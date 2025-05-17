@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>QUIZ FOR STUDENT (6 TO 10 TH)</title>
+  <style>
+    body, html {
+      margin: 0;
+      padding: 0;
+      font-family: Arial, sans-serif;
+      background-size: cover;
+      background-position: center;
+    }
+    #personalDetails, #quizContainer {
+      max-width: 700px;
+      margin: 40px auto;
+      background: rgba(255, 255, 255, 0.9);
+      padding: 20px;
+      border-radius: 8px;
+    }
+    h1, h2 {
+      text-align: center;
+    }
+    label {
+      display: block;
+      margin-top: 12px;
+    }
+    input, select {
+      width: 100%;
+      padding: 8px;
+      margin-top: 4px;
+      box-sizing: border-box;
+    }
+    button {
+      margin-top: 20px;
+      padding: 10px 20px;
+      font-size: 1.1rem;
+      cursor: pointer;
+    }
+    .subjectName {
+      font-size: 1.5rem;
+      font-weight: bold;
+      text-align: center;
+      margin-bottom: 20px;
+      background: rgba(255,255,255,0.8);
+      padding: 10px;
+      border-radius: 6px;
+    }
+    .question {
+      margin-bottom: 20px;
+    }
+    .options label {
+      display: block;
+      padding: 6px;
+      border: 1px solid #ccc;
+      margin-bottom: 6px;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+    .options input[type="radio"] {
+      margin-right: 8px;
+    }
+    .options label.incorrect {
+      background-color: #f8d7da;
+      border-color: #f5c2c7;
+      color: #842029;
+    }
+    .pageNumbers {
+      text-align: center;
+      margin-top: 30px;
+    }
+    .pageNumbers button {
+      margin: 0 4px;
+      padding: 6px 12px;
+      cursor: pointer;
+    }
+    .pageNumbers button.active {
+      font-weight: bold;
+      background-color: #007BFF;
+      color: white;
+    }
+  </style>
+</head>
+<body>
+  <div id="personalDetails">
+    <h1>QUIZ FOR STUDENT (6 TO 10 TH)</h1>
+    <h2>Please enter your personal details to start the quiz</h2>
+    <form id="detailsForm">
+      <label>Name:</label>
+      <input type="text" id="name" required />
+      <label>Class Studied (6 to 10):</label>
+      <select id="classStudied" required>
+        <option value="">Select your class</option>
+        <option value="6">6</option>
+        <option value="7">7</option>
+        <option value="8">8</option>
+        <option value="9">9</option>
+        <option value="10">10</option>
+      </select>
+      <label>Phone Number:</label>
+      <input type="tel" id="phone" required />
+      <label>Email ID:</label>
+      <input type="email" id="email" required />
+      <label>State:</label>
+      <input type="text" id="state" required />
+      <label>District:</label>
+      <input type="text" id="district" required />
+      <button type="submit">Start Quiz</button>
+    </form>
+  </div>
+
+  <div id="quizContainer" style="display:none;">
+    <div class="subjectName" id="subjectName"></div>
+    <form id="quizForm">
+      <div id="questionsArea"></div>
+      <div class="pageNumbers" id="pageNumbers"></div>
+      <button type="button" id="submitBtn" style="display:none;">Submit Quiz</button>
+    </form>
+  </div>
+
+  <script>
+    const detailsForm = document.getElementById("detailsForm");
+    const personalDetails = document.getElementById("personalDetails");
+    const quizContainer = document.getElementById("quizContainer");
+    const subjectName = document.getElementById("subjectName");
+    const questionsArea = document.getElementById("questionsArea");
+    const pageNumbers = document.getElementById("pageNumbers");
+    const submitBtn = document.getElementById("submitBtn");
+
+    const quizData = [
+      // Sample 2 subjects for demonstration, continue up to 10 pages with unique subjects and background
+      {
+        subject: "Tamil",
+        background: "https://i.imgur.com/q4i1M1H.jpg",
+        questions: [
+          { q: "What is Tamil for 'Water'?", options: ["Neer", "Thanni", "Jalam", "Pani"], answer: 0 },
+          { q: "Who wrote Thirukkural?", options: ["Valluvar", "Gandhi", "Bharathi", "Ilango"], answer: 0 },
+          { q: "Tamil festival?", options: ["Pongal", "Diwali", "Holi", "Christmas"], answer: 0 },
+          { q: "Tamil script type?", options: ["Devanagari", "Tamil", "Latin", "None"], answer: 1 },
+          { q: "Tamil alphabet count?", options: ["12", "18", "247", "30"], answer: 2 }
+        ]
+      },
+      {
+        subject: "Math",
+        background: "https://i.imgur.com/Y4ogLeB.jpg",
+        questions: [
+          { q: "5 + 5 = ?", options: ["10", "11", "12", "9"], answer: 0 },
+          { q: "2 x 6 = ?", options: ["10", "11", "12", "13"], answer: 2 },
+          { q: "Square root of 25?", options: ["5", "6", "7", "4"], answer: 0 },
+          { q: "Pi value?", options: ["3.14", "2.14", "1.14", "4.14"], answer: 0 },
+          { q: "Prime number?", options: ["2", "4", "6", "8"], answer: 0 }
+        ]
+      }
+    ];
+
+    let currentPage = 0;
+
+    detailsForm.addEventListener("submit", function(e) {
+      e.preventDefault();
+      personalDetails.style.display = "none";
+      quizContainer.style.display = "block";
+      loadPage(currentPage);
+      renderPageNumbers();
+    });
+
+    function loadPage(index) {
+      const page = quizData[index];
+      document.body.style.backgroundImage = `url(${page.background})`;
+      subjectName.textContent = page.subject;
+      questionsArea.innerHTML = "";
+
+      page.questions.forEach((q, i) => {
+        const div = document.createElement("div");
+        div.className = "question";
+        const options = q.options.map((opt, j) => {
+          const id = `q${index}_${i}_${j}`;
+          return `<label for="${id}"><input type="radio" id="${id}" name="q${index}_${i}" onclick="handleAnswer(this, ${j}, ${q.answer})"> ${opt}</label>`;
+        }).join("");
+        div.innerHTML = `<p>${q.q}</p><div class="options">${options}</div>`;
+        questionsArea.appendChild(div);
+      });
+
+      submitBtn.style.display = (index === quizData.length - 1) ? "block" : "none";
+    }
+
+    function handleAnswer(input, selected, correct) {
+      const labels = input.closest('.options').querySelectorAll('label');
+      labels.forEach(lbl => lbl.querySelector('input').disabled = true);
+      if (selected !== correct) {
+        input.parentElement.classList.add("incorrect");
+      }
+    }
+
+    function renderPageNumbers() {
+      pageNumbers.innerHTML = "";
+      quizData.forEach((_, i) => {
+        const btn = document.createElement("button");
+        btn.textContent = i + 1;
+        btn.className = (i === currentPage) ? "active" : "";
+        btn.addEventListener("click", () => {
+          currentPage = i;
+          loadPage(currentPage);
+          renderPageNumbers();
+        });
+        pageNumbers.appendChild(btn);
+      });
+    }
+
+    submitBtn.addEventListener("click", () => {
+      alert("Quiz completed! Result will be sent to your phone or email.\nOwner will receive it at mmssankar1987@gmail.com.");
+    });
+  </script>
+</body>
+</html>
